@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define MAX_BOIDS 10000
+#define MAX_BOIDS 1000
 #define PREDATOR_INDEX MAX_BOIDS 
 #define MOUSE_INDEX (MAX_BOIDS + 1)
 
@@ -73,7 +73,10 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
 void DrawBoids(void);
 void DrawBoids3D(void);
 void DrawNearestNeighborNetwork(void);
+Vector3 Vector2ToVector3(Vector2 v);
+Vector3 Shift(Vector3 position);
 
 extern int number_drawn;
 extern bool mousePressed;
+extern Model transparentSphere;
 #endif // BOIDS_H

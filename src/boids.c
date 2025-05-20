@@ -9,6 +9,7 @@
 #include "spatial_hash.h"
 #include "normal_random.h"
 
+
 Boid boids[MAX_BOIDS + 2]; // +1 for predator, +1 for mouse
 
 Vector2 Vector2SubtractTorus(Vector2 a, Vector2 b) {
@@ -230,6 +231,33 @@ void DrawBoid(Boid *boid) {
     }
 }
 
+void DrawPreditor3D() {
+    number_drawn++;
+
+    Boid *predator = &boids[MAX_BOIDS];
+
+    Vector3 position = Shift(Vector2ToVector3(predator->position));
+    Vector3 velocity = Vector2ToVector3(predator->velocity);
+    Vector3 dir = Vector3Normalize(velocity);
+
+    Vector3 forward = {1, 0, 0};
+
+    // Cross product gives the rotation axis
+    Vector3 axis = Vector3CrossProduct(forward, dir);
+    float angle = acosf(Vector3DotProduct(forward, dir));
+
+    if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
+
+    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
+
+
+    rlDisableDepthMask();  // Allow overlapping transparent fragments to blend
+    BeginBlendMode(BLEND_ALPHA);
+        DrawModel(transparentSphere, position, PREDATOR_VISUAL_RADIUS, WHITE);
+    EndBlendMode();
+    rlEnableDepthMask();  // Restore depth mask
+}
+
 void DrawPreditor() {
     number_drawn++;
 
@@ -272,7 +300,7 @@ void DrawBoids() {
 void DrawBoids3D() {
     number_drawn = 0;
     for (int i = 0; i < MAX_BOIDS; i++) DrawBoid3D(&boids[i]);
-    //DrawPreditor();
+    DrawPreditor3D();
     //if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
 }
 

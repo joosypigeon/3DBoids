@@ -94,6 +94,7 @@ void DrawRectangle3D(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Color color) {
 
 
 Model dart;
+Model transparentSphere;  // <-- global scope, outside of main()
 
 int main(void)
 {
@@ -116,10 +117,10 @@ int main(void)
     HALF_SCREEN_HEIGHT = SCREEN_HEIGHT / 2.0f;
 
 
-    Vector3 corner01 = { 0.0f, 0.0f, -300.0f };
-    Vector3 corner02 = { SCREEN_WIDTH, 0.0f, -300.0f };
-    Vector3 corner03 = { SCREEN_WIDTH, SCREEN_HEIGHT, -300.0f };
-    Vector3 corner04 = { 0.0f, SCREEN_HEIGHT, -300.0f };
+    //Vector3 corner01 = { 0.0f, 0.0f, -300.0f };
+    //Vector3 corner02 = { SCREEN_WIDTH, 0.0f, -300.0f };
+    //Vector3 corner03 = { SCREEN_WIDTH, SCREEN_HEIGHT, -300.0f };
+    //Vector3 corner04 = { 0.0f, SCREEN_HEIGHT, -300.0f };
 
     SetTargetFPS(60);
 
@@ -140,8 +141,8 @@ int main(void)
 
 
     // Load basic lighting shader
-    Shader shader = LoadShader(TextFormat("/home/jerry/raylib/examples/shaders/boids-3D-copy/src/lighting.vs", GLSL_VERSION),
-                               TextFormat("/home/jerry/raylib/examples/shaders/boids-3D-copy/src/lighting.fs", GLSL_VERSION));
+    Shader shader = LoadShader(TextFormat("/home/jerry/raylib/examples/shaders/resources/shaders/glsl330/lighting.vs", GLSL_VERSION),
+                               TextFormat("/home/jerry/raylib/examples/shaders//resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
     // Get some required shader locations
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     // NOTE: "matModel" location name is automatically assigned on shader loading, 
@@ -160,7 +161,7 @@ int main(void)
     lights[3] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 100, -HALF_SCREEN_HEIGHT }, Vector3Zero(), BLUE, shader);
 
     // Load dart model exported from Blender or dart_export
-    dart = LoadModel("blender_dart.obj");
+    dart = LoadModel("shaders/3DBoids/blender_dart.obj");
     if (dart.meshCount == 0 || dart.meshes == NULL) {
         printf("Failed to load model\n");
         exit(0);   
@@ -172,19 +173,26 @@ int main(void)
         GenMeshTangents(&dart.meshes[0]);
     }
 
-    Vector3 lightDir = { 0.0f, -1.0f, 0.0f }; // From above
-    Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // White light
+        // Create a transparent blue sphere mesh + model
+    Mesh sphereMesh = GenMeshSphere(1.0f, 16, 16);
+    transparentSphere = LoadModelFromMesh(sphereMesh);
+    transparentSphere.materials[0].shader = LoadShader(0, 0);  // use built-in default
+    transparentSphere.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){0, 0, 255, 100};  // Alpha < 255
+
+
+    //Vector3 lightDir = { 0.0f, 1.0f, 0.0f };
+    //Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // White light
     
-    int dirLoc = GetShaderLocation(shader, "lightDir");
-    SetShaderValue(shader, dirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+   // int dirLoc = GetShaderLocation(shader, "lightDir");
+    //SetShaderValue(shader, dirLoc, &lightDir, SHADER_UNIFORM_VEC3);
     
-    int colorLoc = GetShaderLocation(shader, "lightColor");
-    SetShaderValue(shader, colorLoc, &lightColor, SHADER_UNIFORM_VEC4);
+    //int colorLoc = GetShaderLocation(shader, "lightColor");
+    //SetShaderValue(shader, colorLoc, &lightColor, SHADER_UNIFORM_VEC4);
 
 
 
 
-    int number_of_frame = 0;
+    //int number_of_frame = 0;
     while (!WindowShouldClose())
     {
 
@@ -217,6 +225,8 @@ int main(void)
         }
 
         BeginDrawing();
+
+
             ClearBackground(RAYWHITE);
             DrawText("Boids with Predator Simulation", 20, 10, 20, DARKGRAY);
             DrawText("Current Resolution:", 20, 30, 20, DARKGRAY);
@@ -243,8 +253,8 @@ int main(void)
             DrawText("Boid Behaviour Weights", sliderBounds.x, sliderBounds.y - 40, 28, DARKGRAY);
 
             // Make font size larger manually
-            int labelFontSize = 22;
-            int valueFontSize = 22;
+            //int labelFontSize = 22;
+            //int valueFontSize = 22;
 
             GuiSlider(sliderBounds,
                 TextFormat("Alignment (%.2f)", alignmentWeight),
@@ -266,7 +276,6 @@ int main(void)
         
             BeginMode3D(camera);
                 BeginShaderMode(shader);
-                    //DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, WHITE);
                     DrawBoids3D();
                 EndShaderMode();
 

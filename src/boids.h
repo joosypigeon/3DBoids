@@ -59,18 +59,12 @@ extern Boid *debugBoid;
 
 extern Boid boids[MAX_BOIDS+2];
 
-typedef struct BoidNode {
-    Boid* boid;
-    struct BoidNode* next;
-} BoidNode;
-
 void init_spatial_hash(void);
 void clear_spatial_hash(void);
 void insert_boid(Boid* p);
 
 void InitBoids(void);
 void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWeight);
-void DrawBoids(void);
 void DrawBoids3D(void);
 void DrawNearestNeighborNetwork(void);
 Vector3 Vector2ToVector3(Vector2 v);
@@ -78,5 +72,4 @@ Vector3 Shift(Vector3 position);
 
 extern int number_drawn;
 extern bool mousePressed;
-extern Model transparentSphere;
 #endif // BOIDS_H

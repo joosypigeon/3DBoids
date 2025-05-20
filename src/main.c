@@ -160,14 +160,6 @@ int main(void)
         GenMeshTangents(&dart.meshes[0]);
     }
 
-        // Create a transparent blue sphere mesh + model
-    Mesh sphereMesh = GenMeshSphere(1.0f, 16, 16);
-    transparentSphere = LoadModelFromMesh(sphereMesh);
-    transparentSphere.materials[0].shader = LoadShader(0, 0);  // use built-in default
-    transparentSphere.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){0, 0, 255, 100};  // Alpha < 25
-
-
-
 
     //int number_of_frame = 0;
     while (!WindowShouldClose())

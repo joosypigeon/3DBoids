@@ -31,7 +31,6 @@ extern HashCell hash_table[HASH_SIZE];
 void init_spatial_hash(void);
 void clear_spatial_hash(void);
 unsigned int hash_cell(int cell_x, int cell_y);
-void free_boid_node(BoidNode* node);
 
 FlockForces ComputeFlockForces(Boid *boid);
 Vector2 PreditorAjustment();

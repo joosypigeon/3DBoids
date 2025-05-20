@@ -186,7 +186,7 @@ Vector3 Vector2ToVector3(Vector2 v) {
 
 Vector3 Shift(Vector3 position)
 {
-    return (Vector3){position.x - HALF_SCREEN_WIDTH, position.y, position.z - HALF_SCREEN_HEIGHT};  
+    return (Vector3){position.x - HALF_SCREEN_WIDTH, position.y + 100.0f, position.z - HALF_SCREEN_HEIGHT};  
 }
 
 
@@ -204,7 +204,7 @@ void DrawBoid3D(Boid *boid) {
 
     if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
 
-    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, WHITE);
+    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 5.0f, 5.0f, 5.0f }, WHITE);
 }
 
 
@@ -251,11 +251,11 @@ void DrawPreditor3D() {
     DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
 
 
-    rlDisableDepthMask();  // Allow overlapping transparent fragments to blend
-    BeginBlendMode(BLEND_ALPHA);
-        DrawModel(transparentSphere, position, PREDATOR_VISUAL_RADIUS, WHITE);
-    EndBlendMode();
-    rlEnableDepthMask();  // Restore depth mask
+    //rlDisableDepthMask();  // Allow overlapping transparent fragments to blend
+    //BeginBlendMode(BLEND_ALPHA);
+    //    DrawModel(transparentSphere, position, PREDATOR_VISUAL_RADIUS, WHITE);
+    //EndBlendMode();
+    //rlEnableDepthMask();  // Restore depth mask
 }
 
 void DrawPreditor() {

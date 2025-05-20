@@ -36,8 +36,8 @@ Boid *debugBoid = NULL;
 void UpdateCameraManual(Camera3D *camera)
 {
     static float cameraYaw = 0.0f;
-    static float cameraPitch = -PI / 2.0f;  // Looking straight down at the origin
-    static float cameraDistance = 5000.0f;
+    static float cameraPitch = PI / 2.0f;  // Looking straight down at the origin
+    static float cameraDistance = 1000.0f;
     static Vector3 target = { 0.0f, 0.0f, 0.0f };
 
     float wheel = GetMouseWheelMove();
@@ -78,19 +78,6 @@ void UpdateCameraManual(Camera3D *camera)
     camera->up = (Vector3){ 0.0f, 1.0f, 0.0f };
 }
 
-
-
-void DrawRectangle3D(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Color color) {
-    rlBegin(RL_QUADS);
-    rlColor4ub(color.r, color.g, color.b, color.a);
-
-    rlVertex3f(a.x, a.y, a.z);
-    rlVertex3f(b.x, b.y, b.z);
-    rlVertex3f(c.x, c.y, c.z);
-    rlVertex3f(d.x, d.y, d.z);
-
-    rlEnd();
-}
 
 
 Model dart;
@@ -155,10 +142,10 @@ int main(void)
 
     // Create lights
     Light lights[MAX_LIGHTS] = { 0 };
-    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -HALF_SCREEN_WIDTH, 100, -HALF_SCREEN_HEIGHT }, Vector3Zero(), YELLOW, shader);
-    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 100, HALF_SCREEN_HEIGHT }, Vector3Zero(), RED, shader);
-    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -HALF_SCREEN_WIDTH, 100, HALF_SCREEN_HEIGHT }, Vector3Zero(), GREEN, shader);
-    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 100, -HALF_SCREEN_HEIGHT }, Vector3Zero(), BLUE, shader);
+    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -HALF_SCREEN_WIDTH, 200, -HALF_SCREEN_HEIGHT }, Vector3Zero(), YELLOW, shader);
+    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 200, HALF_SCREEN_HEIGHT }, Vector3Zero(), RED, shader);
+    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -HALF_SCREEN_WIDTH, 200, HALF_SCREEN_HEIGHT }, Vector3Zero(), GREEN, shader);
+    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 200, -HALF_SCREEN_HEIGHT }, Vector3Zero(), BLUE, shader);
 
     // Load dart model exported from Blender or dart_export
     dart = LoadModel("shaders/3DBoids/blender_dart.obj");
@@ -177,17 +164,7 @@ int main(void)
     Mesh sphereMesh = GenMeshSphere(1.0f, 16, 16);
     transparentSphere = LoadModelFromMesh(sphereMesh);
     transparentSphere.materials[0].shader = LoadShader(0, 0);  // use built-in default
-    transparentSphere.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){0, 0, 255, 100};  // Alpha < 255
-
-
-    //Vector3 lightDir = { 0.0f, 1.0f, 0.0f };
-    //Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // White light
-    
-   // int dirLoc = GetShaderLocation(shader, "lightDir");
-    //SetShaderValue(shader, dirLoc, &lightDir, SHADER_UNIFORM_VEC3);
-    
-    //int colorLoc = GetShaderLocation(shader, "lightColor");
-    //SetShaderValue(shader, colorLoc, &lightColor, SHADER_UNIFORM_VEC4);
+    transparentSphere.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = (Color){0, 0, 255, 100};  // Alpha < 25
 
 
 
@@ -228,6 +205,23 @@ int main(void)
 
 
             ClearBackground(RAYWHITE);
+
+            BeginMode3D(camera);
+                BeginShaderMode(shader);
+                DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, WHITE);
+                    DrawBoids3D();
+                EndShaderMode();
+
+                // Draw spheres to show where the lights are
+                for (int i = 0; i < MAX_LIGHTS; i++)
+                {
+                    if (lights[i].enabled) DrawSphereEx(lights[i].position, 10.0f, 8, 8, lights[i].color);
+                    else DrawSphereWires(lights[i].position, 10.0f, 8, 8, ColorAlpha(lights[i].color, 0.3f));
+                }
+
+            EndMode3D();
+
+
             DrawText("Boids with Predator Simulation", 20, 10, 20, DARKGRAY);
             DrawText("Current Resolution:", 20, 30, 20, DARKGRAY);
             DrawText(TextFormat("%d x %d", SCREEN_WIDTH, SCREEN_HEIGHT), 20, 50, 30, BLUE);
@@ -274,19 +268,7 @@ int main(void)
                 &separationWeight, 0.0f, 10.0f);
 
         
-            BeginMode3D(camera);
-                BeginShaderMode(shader);
-                    DrawBoids3D();
-                EndShaderMode();
 
-                // Draw spheres to show where the lights are
-                for (int i = 0; i < MAX_LIGHTS; i++)
-                {
-                    if (lights[i].enabled) DrawSphereEx(lights[i].position, 10.0f, 8, 8, lights[i].color);
-                    else DrawSphereWires(lights[i].position, 10.0f, 8, 8, ColorAlpha(lights[i].color, 0.3f));
-                }
-
-            EndMode3D();
         EndDrawing();
     }
 

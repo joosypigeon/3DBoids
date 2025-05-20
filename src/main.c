@@ -208,7 +208,7 @@ int main(void)
 
             BeginMode3D(camera);
                 BeginShaderMode(shader);
-                DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, WHITE);
+                    DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, DARKGRAY);
                     DrawBoids3D();
                 EndShaderMode();
 

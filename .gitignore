@@ -1,0 +1,68 @@
+# ─── Compiled object files ───
+*.o
+*.obj
+
+# ─── Executables and binary output ───
+*.exe
+*.out
+*.elf
+*.bin
+main
+a.out
+
+# ─── Core dumps ───
+core
+
+# ─── Build artifacts ───
+/build/
+/bin/
+/dist/
+
+# ─── Make/CMake/Autotools cache ───
+Makefile
+CMakeCache.txt
+CMakeFiles/
+config.log
+config.status
+configure
+autom4te.cache/
+
+# ─── Temporary files ───
+*~
+*.swp
+*.tmp
+*.bak
+*.rej
+*.orig
+
+# ─── OS-specific noise ───
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# ─── IDE/editor configs ───
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# ─── Debug output / trace files ───
+*.log
+*.trace
+*.dSYM/
+
+# ─── Lisp: ignore temp but not source ───
+*.fasl          # compiled Lisp output
+*.lisp~         # editor backups
+*.lsp~          
+*.cl~           
+*.tmp.lisp      
+
+# ─── Tests and scratch files ───
+*.testout
+*.result
+*.check
+
+# ─── Tags / navigation aids ───
+tags
+TAGS

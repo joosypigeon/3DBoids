@@ -152,33 +152,6 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
     boids[PREDATOR_INDEX].position = Vector2Wrap(boids[PREDATOR_INDEX].position, SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-static Color colors[11] = {
-    (Color){  0,  40,  82, 255},  // Deep Blue (20% darker)
-    (Color){  0,  60, 122, 255},
-    (Color){  0,  81, 163, 255},
-    (Color){ 40, 122, 204, 255},  // Light Blue
-    (Color){ 81, 163, 204, 255},  // Cyanish
-    (Color){102, 184, 184, 255},  // Light greenish-cyan
-    (Color){122, 204, 163, 255},  // Minty green
-    (Color){204, 204,  81, 255},  // Yellow
-    (Color){204, 163,  40, 255},  // Orange-Yellow
-    (Color){204,  81,  40, 255},  // Orange
-    (Color){163,   0,   0, 255}   // Deep Red (hottest)
-};
-
-int int_log2(int x) {
-    if (x < 0) { exit(0); } // Error: log2(0) is undefined}
-    if (x <= 0) {
-        return 0;
-    }
-    int log = 0;
-    while (x >>= 1) {
-        log++;
-        if (log >= 10) return 10;
-        }
-    return log;
-}
-
 int number_drawn = 0;
 Vector3 Vector2ToVector3(Vector2 v) {
     return (Vector3){ v.x, 0.0f, v.y};
@@ -204,31 +177,7 @@ void DrawBoid3D(Boid *boid) {
 
     if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
 
-    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 5.0f, 5.0f, 5.0f }, WHITE);
-}
-
-
-void DrawBoid(Boid *boid) {
-    number_drawn++;
-    float size = BOID_RADIUS;
-    Vector2 topLeft = { boid->position.x - size / 2, boid->position.y - size / 2 };
-    Color color =  drawDensity ? colors[int_log2(boid->neighborCount + boid->nearNeighborCount)] : DARKGRAY;
-    color = debugBoid == boid ? RED : color;
-    DrawRectangleV(topLeft, (Vector2){size, size}, color);
-    if (drawFullGlyph) {
-        // Normalize velocity to get direction
-        Vector2 dir = Vector2Normalize(boid->velocity);
-
-        // Draw main circle
-        DrawCircleLinesV(boid->position, PROTECTED_RADIUS/2.0, boid->predated ? GREEN : color);
-
-        // Compute tail endpoint (outside of the circle)
-        Vector2 tailDir = Vector2Scale(dir, -(10.0f + 10)); // 10 pixels past edge
-        Vector2 tailEnd = Vector2Add(boid->position, tailDir);
-
-        // Draw tail line
-        DrawLineV(boid->position, tailEnd, boid->predated ? GREEN : color);
-    }
+    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 3.0f, 3.0f, 3.0f }, WHITE);
 }
 
 void DrawPreditor3D() {
@@ -249,13 +198,6 @@ void DrawPreditor3D() {
     if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
 
     DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
-
-
-    //rlDisableDepthMask();  // Allow overlapping transparent fragments to blend
-    //BeginBlendMode(BLEND_ALPHA);
-    //    DrawModel(transparentSphere, position, PREDATOR_VISUAL_RADIUS, WHITE);
-    //EndBlendMode();
-    //rlEnableDepthMask();  // Restore depth mask
 }
 
 void DrawPreditor() {
@@ -288,13 +230,6 @@ void DrawMouse(Boid boid) {
 
     // Draw center dot
     DrawCircleV(boid.position, BOID_RADIUS, RED);
-}
-
-void DrawBoids() {
-    number_drawn = 0;
-    for (int i = 0; i < MAX_BOIDS; i++) DrawBoid(&boids[i]);
-    DrawPreditor();
-    if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
 }
 
 void DrawBoids3D() {

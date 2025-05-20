@@ -103,12 +103,6 @@ int main(void)
     HALF_SCREEN_WIDTH = SCREEN_WIDTH / 2.0f;
     HALF_SCREEN_HEIGHT = SCREEN_HEIGHT / 2.0f;
 
-
-    //Vector3 corner01 = { 0.0f, 0.0f, -300.0f };
-    //Vector3 corner02 = { SCREEN_WIDTH, 0.0f, -300.0f };
-    //Vector3 corner03 = { SCREEN_WIDTH, SCREEN_HEIGHT, -300.0f };
-    //Vector3 corner04 = { 0.0f, SCREEN_HEIGHT, -300.0f };
-
     SetTargetFPS(60);
 
     InitBoids();
@@ -124,12 +118,8 @@ int main(void)
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-
-
-
     // Load basic lighting shader
-    Shader shader = LoadShader(TextFormat("/home/jerry/raylib/examples/shaders/resources/shaders/glsl330/lighting.vs", GLSL_VERSION),
-                               TextFormat("/home/jerry/raylib/examples/shaders//resources/shaders/glsl330/lighting.fs", GLSL_VERSION));
+    Shader shader = LoadShader("src/lighting.vs","src/lighting.fs");
     // Get some required shader locations
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     // NOTE: "matModel" location name is automatically assigned on shader loading, 
@@ -148,7 +138,7 @@ int main(void)
     lights[3] = CreateLight(LIGHT_POINT, (Vector3){ HALF_SCREEN_WIDTH, 200, -HALF_SCREEN_HEIGHT }, Vector3Zero(), BLUE, shader);
 
     // Load dart model exported from Blender or dart_export
-    dart = LoadModel("shaders/3DBoids/blender_dart.obj");
+    dart = LoadModel("blender_dart.obj");
     if (dart.meshCount == 0 || dart.meshes == NULL) {
         printf("Failed to load model\n");
         exit(0);   
@@ -167,8 +157,6 @@ int main(void)
 
 
         // Update camera
-        //UpdateCameraManual(&camera);
-        //UpdateCamera(&camera, CAMERA_THIRD_PERSON);
         UpdateCameraManual(&camera);
 
         // Update the shader with the camera view vector (points towards { 0.0f, 0.0f, 0.0f })
@@ -194,8 +182,6 @@ int main(void)
         }
 
         BeginDrawing();
-
-
             ClearBackground(RAYWHITE);
 
             BeginMode3D(camera);
@@ -210,7 +196,6 @@ int main(void)
                     if (lights[i].enabled) DrawSphereEx(lights[i].position, 10.0f, 8, 8, lights[i].color);
                     else DrawSphereWires(lights[i].position, 10.0f, 8, 8, ColorAlpha(lights[i].color, 0.3f));
                 }
-
             EndMode3D();
 
 
@@ -221,8 +206,6 @@ int main(void)
             DrawText(TextFormat("Frame Time: %0.2f ms", GetFrameTime() * 1000), 20, 110, 30, BLUE);
             DrawText(TextFormat("OpenMP threads: %d", omp_get_max_threads()), 20, 140, 30, BLUE);
 
-
-            
             DrawFPS(SCREEN_WIDTH - 100, 10);
 
             // Start the sliders below the text stats
@@ -249,9 +232,6 @@ int main(void)
                 TextFormat("Separation (%.2f)", separationWeight),
                 NULL,
                 &separationWeight, 0.0f, 10.0f);
-
-        
-
         EndDrawing();
     }
 

@@ -1,34 +1,78 @@
 #version 330
 
-in vec3 fragNormal;     // world-space normal
-in vec3 fragPosition;   // world-space position
+// Input vertex attributes (from vertex shader)
+in vec3 fragPosition;
+in vec2 fragTexCoord;
+in vec4 fragColor;
+in vec3 fragNormal;
 
-uniform vec3 lightDir;     // world-space light direction (e.g. sun)
-uniform vec4 lightColor;   // light colour (e.g. white = vec4(1.0))
+// Input uniform values
+uniform sampler2D texture0;
+uniform vec4 colDiffuse;
 
+// Output fragment color
 out vec4 finalColor;
 
-void main() {
-    vec3 norm = normalize(fragNormal);
-    vec3 light = normalize(-lightDir);  // direction *toward* the surface
+// NOTE: Add your custom variables here
 
-    // Diffuse lighting
-    float diffuse = max(dot(norm, light), 0.0);
-    diffuse = pow(diffuse, 0.6);  // optional gamma boost
+#define     MAX_LIGHTS              4
+#define     LIGHT_DIRECTIONAL       0
+#define     LIGHT_POINT             1
 
-    // Ambient term to prevent full black
-    vec3 ambient = vec3(0.1);
+struct Light {
+    int enabled;
+    int type;
+    vec3 position;
+    vec3 target;
+    vec4 color;
+};
 
-    // Optional: specular lighting (simple Phong)
-    vec3 viewDir = normalize(-fragPosition); // assumes camera near origin
-    vec3 reflectDir = reflect(-light, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-    vec3 specular = vec3(0.5) * spec;  // grey specular
+// Input lighting values
+uniform Light lights[MAX_LIGHTS];
+uniform vec4 ambient;
+uniform vec3 viewPos;
 
-    // Base object colour (can be uniform or texture later)
-    vec3 baseColor = vec3(1.0);  // white dart
+void main()
+{
+    // Texel color fetching from texture sampler
+    vec4 texelColor = texture(texture0, fragTexCoord);
+    vec3 lightDot = vec3(0.0);
+    vec3 normal = normalize(fragNormal);
+    vec3 viewD = normalize(viewPos - fragPosition);
+    vec3 specular = vec3(0.0);
 
-    vec3 lighting = (ambient + diffuse + specular) * baseColor * lightColor.rgb;
+    vec4 tint = colDiffuse * fragColor;
 
-    finalColor = vec4(lighting, 1.0);
+    // NOTE: Implement here your fragment shader code
+
+    for (int i = 0; i < MAX_LIGHTS; i++)
+    {
+        if (lights[i].enabled == 1)
+        {
+            vec3 light = vec3(0.0);
+
+            if (lights[i].type == LIGHT_DIRECTIONAL)
+            {
+                light = -normalize(lights[i].target - lights[i].position);
+            }
+
+            if (lights[i].type == LIGHT_POINT)
+            {
+                light = normalize(lights[i].position - fragPosition);
+            }
+
+            float NdotL = max(dot(normal, light), 0.0);
+            lightDot += lights[i].color.rgb*NdotL;
+
+            float specCo = 0.0;
+            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // 16 refers to shine
+            specular += specCo;
+        }
+    }
+
+    finalColor = (texelColor*((tint + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
+    finalColor += texelColor*(ambient/10.0)*tint;
+
+    // Gamma correction
+    finalColor = pow(finalColor, vec4(1.0/2.2));
 }

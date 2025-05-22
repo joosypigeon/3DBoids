@@ -6,8 +6,10 @@
 #include <omp.h>
 
 #include "boids.h"
+#include "torus.h"
 #include "spatial_hash.h"
 #include "normal_random.h"
+
 
 
 Boid boids[MAX_BOIDS + 2]; // +1 for predator, +1 for mouse
@@ -180,6 +182,30 @@ void DrawBoid3D(Boid *boid) {
     DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 3.0f, 3.0f, 3.0f }, WHITE);
 }
 
+void DrawBoid3DTorus(Boid *boid) {
+    number_drawn++;
+
+    Vector3 position = Vector3Add(
+        get_torus_position(boid->position.x, boid->position.y),
+        Vector3Scale(get_torus_normal(boid->position.x, boid->position.y), 10.0f));
+
+    Vector3 velocity = Vector3Add(
+        Vector3Scale(get_theta_tangent(boid->position.x, boid->position.y), boid->velocity.x),
+        Vector3Scale(get_phi_tangent(boid->position.x, boid->position.y), boid->velocity.y));
+
+    Vector3 dir = Vector3Normalize(velocity);
+
+    Vector3 forward = {1, 0, 0};
+
+    // Cross product gives the rotation axis
+    Vector3 axis = Vector3CrossProduct(forward, dir);
+    float angle = acosf(Vector3DotProduct(forward, dir));
+
+    if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
+
+    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 3.0f, 3.0f, 3.0f }, WHITE);
+}
+
 void DrawPreditor3D() {
     number_drawn++;
 
@@ -200,28 +226,30 @@ void DrawPreditor3D() {
     DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
 }
 
-void DrawPreditor() {
+void DrawPreditor3DTorus() {
     number_drawn++;
 
     Boid *predator = &boids[MAX_BOIDS];
 
-    // Normalize velocity to get direction
-    Vector2 dir = Vector2Normalize(predator->velocity);
+    Vector3 position = Vector3Add(
+        get_torus_position(predator->position.x, predator->position.y),
+        Vector3Scale(get_torus_normal(predator->position.x, predator->position.y), 10.0f));
 
-    DrawCircleLines(predator->position.x, predator->position.y, PREDATOR_VISUAL_RADIUS, BLUE);
+    Vector3 velocity = Vector3Add(
+        Vector3Scale(get_theta_tangent(predator->position.x, predator->position.y), predator->velocity.x),
+        Vector3Scale(get_phi_tangent(predator->position.x, predator->position.y), predator->velocity.y));
 
-    // Draw main circle
-    DrawCircleLinesV(predator->position, PREDATOR_RADIUS, RED);
+    Vector3 dir = Vector3Normalize(velocity);
 
-    // Draw center dot
-    DrawCircleV(predator->position, 2.0f, DARKGRAY);
+    Vector3 forward = {1, 0, 0};
 
-    // Compute tail endpoint (outside of the circle)
-    Vector2 tailDir = Vector2Scale(dir, -(10.0f + 10)); // 10 pixels past edge
-    Vector2 tailEnd = Vector2Add(predator->position, tailDir);
+    // Cross product gives the rotation axis
+    Vector3 axis = Vector3CrossProduct(forward, dir);
+    float angle = acosf(Vector3DotProduct(forward, dir));
 
-    // Draw tail line
-    DrawLineV(predator->position, tailEnd, BLUE);
+    if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
+
+    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
 }
 
 void DrawMouse(Boid boid) {
@@ -236,6 +264,13 @@ void DrawBoids3D() {
     number_drawn = 0;
     for (int i = 0; i < MAX_BOIDS; i++) DrawBoid3D(&boids[i]);
     DrawPreditor3D();
+    //if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
+}
+
+void DrawBoids3DTorus() {
+    number_drawn = 0;
+    for (int i = 0; i < MAX_BOIDS; i++) DrawBoid3DTorus(&boids[i]);
+    DrawPreditor3DTorus();
     //if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
 }
 

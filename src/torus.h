@@ -5,6 +5,16 @@
 #include "raymath.h"
 #include <math.h>
 
-Mesh GenTorusMesh(float R, float r, int rings, int sides);
+extern int SCREEN_WIDTH;
+extern int SCREEN_HEIGHT;
+
+void SetTorusDimensions(float major, float minor);
+Mesh MyGenTorusMesh(int rings, int sides);
+
+
+Vector3 get_torus_position(float u, float v);
+Vector3 get_torus_normal(float u, float v);
+Vector3 get_phi_tangent(float u, float v);
+Vector3 get_theta_tangent(float u, float v);
 
 #endif // TORUS_H

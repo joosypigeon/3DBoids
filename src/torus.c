@@ -1,6 +1,15 @@
 #include "torus.h"
 
-Mesh GenTorusMesh(float R, float r, int rings, int sides) {
+static float R = -1.0f;
+static float r = -1.0f;
+
+void SetTorusDimensions(float major, float minor) {
+    R = major;
+    r = minor;
+}
+
+
+Mesh MyGenTorusMesh(int rings, int sides) {
     int vertexCount = rings * sides * 6;
     Vector3 *vertices = (Vector3 *)MemAlloc(vertexCount * sizeof(Vector3));
     Vector3 *normals = (Vector3 *)MemAlloc(vertexCount * sizeof(Vector3));
@@ -59,4 +68,55 @@ Mesh GenTorusMesh(float R, float r, int rings, int sides) {
 
     UploadMesh(&mesh, false);
     return mesh;
+}
+
+float get_theta(float u) {
+        return 2 * PI * u / SCREEN_WIDTH;
+}
+
+float get_phi(float v) {
+        return 2 * PI * v / SCREEN_HEIGHT;
+}
+
+Vector3 get_torus_normal(float u, float v) {
+    float theta = get_theta(u);
+    float phi = get_phi(v);
+
+    float nx = cosf(phi) * cosf(theta);
+    float ny = sinf(phi);
+    float nz = cosf(phi) * sinf(theta);
+
+    return (Vector3){ nx, ny, nz };
+}
+
+Vector3 get_phi_tangent(float u, float v) {
+    float theta = get_theta(u);
+    float phi = get_phi(v);
+
+    float tx = -sinf(phi) * cosf(theta);
+    float ty = cosf(phi);
+    float tz = -sinf(phi) * sinf(theta);
+
+    return (Vector3){ tx, ty, tz };
+}
+
+Vector3 get_theta_tangent(float u, float v) {
+    float theta = get_theta(u);
+
+    float tx = -sinf(theta);
+    float ty = 0.0f;
+    float tz =  cosf(theta);
+
+    return (Vector3){ tx, ty, tz };
+}
+
+Vector3 get_torus_position(float u, float v) {
+    float theta = get_theta(u);
+    float phi = get_phi(v);
+
+    float x = (R + r * cosf(phi)) * cosf(theta);
+    float y = r * sinf(phi);
+    float z = (R + r * cosf(phi)) * sinf(theta);
+
+    return (Vector3){ x, y, z };
 }

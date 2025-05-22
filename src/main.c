@@ -113,7 +113,8 @@ int main(void)
 
     float R = SCREEN_WIDTH / (2.0f * PI);
     float r = SCREEN_HEIGHT / (2.0f * PI);
-    Mesh torus_mesh = GenTorusMesh(R, r, TORUS_MAJOR_SEGMENTS, TORUS_MINOR_SEGMENTS);
+    SetTorusDimensions(R, r);
+    Mesh torus_mesh = MyGenTorusMesh(TORUS_MAJOR_SEGMENTS, TORUS_MINOR_SEGMENTS);
     GenMeshTangents(&torus_mesh);
     Model torus_model = LoadModelFromMesh(torus_mesh);
     torus_model.materials[0].shader = shader;  // <== Required for lighting to take effect
@@ -159,6 +160,8 @@ int main(void)
                         DrawBoids3D();
                     } else {
                         DrawModel(torus_model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+                        DrawBoids3DTorus();
+
                     }
                 EndShaderMode();
 

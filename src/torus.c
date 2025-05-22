@@ -1,5 +1,13 @@
 #include "torus.h"
 
+typedef struct TorusCoords {
+    float theta, phi;
+    float cosTheta, sinTheta;
+    float cosPhi, sinPhi;
+} TorusCoords;
+
+static TorusCoords torusCoords = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f};
+
 static float R = -1.0f;
 static float r = -1.0f;
 
@@ -119,4 +127,33 @@ Vector3 get_torus_position(float u, float v) {
     float z = (R + r * cosf(phi)) * sinf(theta);
 
     return (Vector3){ x, y, z };
+}
+
+void set_torus_coords(float u, float v) {
+    torusCoords.theta = get_theta(u);
+    torusCoords.phi = get_phi(v);
+    torusCoords.cosTheta = cosf(torusCoords.theta);
+    torusCoords.sinTheta = sinf(torusCoords.theta);
+    torusCoords.cosPhi = cosf(torusCoords.phi);
+    torusCoords.sinPhi = sinf(torusCoords.phi);
+}
+
+Vector3 get_torus_position_fast() {
+    return (Vector3){ (R + r * torusCoords.cosPhi) * torusCoords.cosTheta,
+                      r * torusCoords.sinPhi,
+                      (R + r * torusCoords.cosPhi) * torusCoords.sinTheta };
+}
+
+Vector3 get_torus_normal_fast() {
+    return (Vector3){ torusCoords.cosPhi * torusCoords.cosTheta,
+                      torusCoords.sinPhi,
+                      torusCoords.cosPhi * torusCoords.sinTheta };
+}
+Vector3 get_theta_tangent_fast() {
+    return (Vector3){ -torusCoords.sinTheta, 0.0f, torusCoords.cosTheta };
+}
+Vector3 get_phi_tangent_fast() {
+    return (Vector3){ -torusCoords.sinPhi * torusCoords.cosTheta,
+                      torusCoords.cosPhi,
+                      -torusCoords.sinPhi * torusCoords.sinTheta };
 }

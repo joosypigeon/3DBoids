@@ -181,7 +181,7 @@ int main(void)
             DrawText(TextFormat("Frame Time: %0.2f ms", GetFrameTime() * 1000), 20, 110, 30, BLUE);
             DrawText(TextFormat("OpenMP threads: %d", omp_get_max_threads()), 20, 140, 30, BLUE);
 
-            GuiCheckBox((Rectangle){ 20, 170, 28, 28 }, "Draw Full Boid Glyph", &flat);
+            GuiCheckBox((Rectangle){ 20, 170, 28, 28 }, "Draw flat", &flat);
 
             DrawFPS(SCREEN_WIDTH - 100, 10);
 

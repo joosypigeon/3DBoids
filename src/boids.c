@@ -231,13 +231,15 @@ void DrawPreditor3DTorus() {
 
     Boid *predator = &boids[MAX_BOIDS];
 
+    set_torus_coords(predator->position.x, predator->position.y);
+
     Vector3 position = Vector3Add(
-        get_torus_position(predator->position.x, predator->position.y),
-        Vector3Scale(get_torus_normal(predator->position.x, predator->position.y), 10.0f));
+        get_torus_position_fast(),
+        Vector3Scale(get_torus_normal_fast(), 10.0f));
 
     Vector3 velocity = Vector3Add(
-        Vector3Scale(get_theta_tangent(predator->position.x, predator->position.y), predator->velocity.x),
-        Vector3Scale(get_phi_tangent(predator->position.x, predator->position.y), predator->velocity.y));
+        Vector3Scale(get_theta_tangent_fast(), predator->velocity.x),
+        Vector3Scale(get_phi_tangent_fast(), predator->velocity.y));
 
     Vector3 dir = Vector3Normalize(velocity);
 

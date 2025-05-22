@@ -17,4 +17,10 @@ Vector3 get_torus_normal(float u, float v);
 Vector3 get_phi_tangent(float u, float v);
 Vector3 get_theta_tangent(float u, float v);
 
+void set_torus_coords(float u, float v);
+Vector3 get_torus_position_fast();
+Vector3 get_torus_normal_fast();
+Vector3 get_theta_tangent_fast();
+Vector3 get_phi_tangent_fast();
+
 #endif // TORUS_H

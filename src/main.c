@@ -19,8 +19,14 @@
 #include "boids.h"
 #include "spatial_hash.h"
 #define RAYGUI_IMPLEMENTATION
-
 #include "raygui.h"
+
+#include "torus.h"
+#define TORUS_MAJOR_RADIUS 100.0f
+#define TORUS_MINOR_RADIUS 10.0f
+#define TORUS_MAJOR_SEGMENTS 64
+#define TORUS_MINOR_SEGMENTS 32
+
 
 int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
@@ -31,6 +37,7 @@ bool drawDensity = false;
 bool mousePressed = false;
 bool nearestNeighboursNetwork = false;
 bool pauseSimulation = false;
+bool flat = true;
 Boid *debugBoid = NULL;
 
 void UpdateCameraManual(Camera3D *camera)
@@ -150,6 +157,13 @@ int main(void)
         GenMeshTangents(&dart.meshes[0]);
     }
 
+    float R = SCREEN_WIDTH / (2.0f * PI);
+    float r = SCREEN_HEIGHT / (2.0f * PI);
+    Mesh torus_mesh = GenTorusMesh(R, r, TORUS_MAJOR_SEGMENTS, TORUS_MINOR_SEGMENTS);
+    GenMeshTangents(&torus_mesh);
+    Model torus_model = LoadModelFromMesh(torus_mesh);
+    torus_model.materials[0].shader = shader;  // <== Required for lighting to take effect
+
 
     //int number_of_frame = 0;
     while (!WindowShouldClose())
@@ -186,8 +200,12 @@ int main(void)
 
             BeginMode3D(camera);
                 BeginShaderMode(shader);
-                    DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, DARKGRAY);
-                    DrawBoids3D();
+                    if (flat) {
+                        DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, DARKGRAY);
+                        DrawBoids3D();
+                    } else {
+                        DrawModel(torus_model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+                    }
                 EndShaderMode();
 
                 // Draw spheres to show where the lights are
@@ -205,6 +223,8 @@ int main(void)
             DrawText(TextFormat("Boids drawn: %d", number_drawn), 20, 80, 30, BLUE);
             DrawText(TextFormat("Frame Time: %0.2f ms", GetFrameTime() * 1000), 20, 110, 30, BLUE);
             DrawText(TextFormat("OpenMP threads: %d", omp_get_max_threads()), 20, 140, 30, BLUE);
+
+            GuiCheckBox((Rectangle){ 20, 170, 28, 28 }, "Draw Full Boid Glyph", &flat);
 
             DrawFPS(SCREEN_WIDTH - 100, 10);
 

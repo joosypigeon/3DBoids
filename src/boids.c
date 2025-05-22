@@ -185,13 +185,14 @@ void DrawBoid3D(Boid *boid) {
 void DrawBoid3DTorus(Boid *boid) {
     number_drawn++;
 
+    set_torus_coords(boid->position.x, boid->position.y);
     Vector3 position = Vector3Add(
-        get_torus_position(boid->position.x, boid->position.y),
-        Vector3Scale(get_torus_normal(boid->position.x, boid->position.y), 10.0f));
+        get_torus_position_fast(),
+        Vector3Scale(get_torus_normal_fast(), 10.0f));
 
     Vector3 velocity = Vector3Add(
-        Vector3Scale(get_theta_tangent(boid->position.x, boid->position.y), boid->velocity.x),
-        Vector3Scale(get_phi_tangent(boid->position.x, boid->position.y), boid->velocity.y));
+        Vector3Scale(get_theta_tangent_fast(), boid->velocity.x),
+        Vector3Scale(get_phi_tangent_fast(), boid->velocity.y));
 
     Vector3 dir = Vector3Normalize(velocity);
 

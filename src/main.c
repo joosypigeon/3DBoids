@@ -25,8 +25,8 @@
 
 #include "torus.h"
 
-#define TORUS_MAJOR_SEGMENTS 64
-#define TORUS_MINOR_SEGMENTS 32
+#define TORUS_MAJOR_SEGMENTS 256
+#define TORUS_MINOR_SEGMENTS 128
 
 
 int SCREEN_WIDTH;

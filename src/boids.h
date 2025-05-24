@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define MAX_BOIDS 500
+#define MAX_BOIDS 20000
 #define PREDATOR_INDEX MAX_BOIDS 
 #define MOUSE_INDEX (MAX_BOIDS + 1)
 
@@ -20,7 +20,7 @@
 #define MATCH_FACTOR 0.1f
 #define CENTER_FACTOR 0.001f
 #define TURN_FACTOR 0.2f
-#define PREDATOR_AVOID_FACTOR 25.0f
+#define PREDATOR_AVOID_FACTOR 50.0f
 #define MOUSE_ATTRACTION_FACTOR 0.5f
 
 #define MAX_SPEED 4.5f
@@ -47,7 +47,6 @@ extern bool nearestNeighboursNetwork;
 typedef struct Boid {
     Vector2 position;
     Vector2 velocity;
-    Vector2 position_update;
     Vector2 velocity_update;
     int neighborCount;
     int nearNeighborCount;
@@ -57,7 +56,7 @@ typedef struct Boid {
 
 extern Boid *debugBoid;
 
-extern Boid boids[MAX_BOIDS+2];
+extern Boid boids[MAX_BOIDS+1];
 
 void init_spatial_hash(void);
 void clear_spatial_hash(void);
@@ -72,6 +71,5 @@ Vector3 Vector2ToVector3(Vector2 v);
 Vector3 Shift(Vector3 position);
 
 extern int number_drawn;
-extern bool mousePressed;
 extern bool flat;
 #endif // BOIDS_H

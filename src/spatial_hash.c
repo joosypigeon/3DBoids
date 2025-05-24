@@ -89,13 +89,13 @@ FlockForces ComputeFlockForces(Boid *boid) {
             for (int j = 0; j < cell->length; ++j) {
                 Boid* neighbor = cell->boids[j];
                 if (neighbor != boid) {
-                    float dist = DistanceOnTorus(boid->position, neighbor->position);
-                    if (dist < PROTECTED_RADIUS) {
+                    float dist = DistanceOnTorusSquared(boid->position, neighbor->position);
+                    if (dist < PROTECTED_RADIUS * PROTECTED_RADIUS) {
                         Vector2 diff = Vector2SubtractTorus(boid->position, neighbor->position);
-                        if (dist != 0) diff = Vector2Scale(diff, 1.0f / (dist*dist)) ;
+                        if (dist != 0) diff = Vector2Scale(diff, 1.0f / dist) ;
                         forces.separation = Vector2Add(forces.separation, diff);
                         forces.nearNeighborCount++;
-                    } else if (dist < NEIGHBOR_RADIUS) {
+                    } else if (dist < NEIGHBOR_RADIUS * NEIGHBOR_RADIUS) {
                         forces.alignment = Vector2Add(forces.alignment, neighbor->velocity);
                         Vector2 diff = Vector2SubtractTorus(neighbor->position, boid->position);
                         forces.cohesion = Vector2Add(forces.cohesion, Vector2Add(diff, boid->position));
@@ -140,7 +140,7 @@ Boid *FindNearestBoid(Vector2 position) {
     return nearest_boid;
 }
 
-
+// Function to calculate the ceiling of integer division
 int ceil_div(int a, int b) {
     // Expect both a and b to be positive
     return (a + b - 1) / b;
@@ -168,15 +168,20 @@ Vector2 PreditorAjustment(){
             for (int j = 0; j < cell->length; ++j) {
                 Boid* neighbor = cell->boids[j];
                 if (neighbor != predator) {
-                    float dist = DistanceOnTorus(predator->position, neighbor->position);
-                    if (dist < PREDATOR_VISUAL_RADIUS) {
+                    float dist = DistanceOnTorusSquared(predator->position, neighbor->position);
+                    if (dist < PREDATOR_VISUAL_RADIUS * PREDATOR_VISUAL_RADIUS) {
                         count++;
                         Vector2 diff = Vector2SubtractTorus(neighbor->position, predator->position);
                         Vector2 to_neighbor = Vector2Normalize(diff);
-                        float alignment = Vector2DotProduct(predator_dir, to_neighbor);  // ranges from -1.0 to 1.0
-                        float scale = (alignment + 1.0f) * 0.5f;
+                        float alignment = Vector2DotProduct(predator_dir, to_neighbor);  // ranges from -1.0 back to 1.0 front
+                        float scale = (alignment + 1.0f) * 0.5f; // scale from 0.0 back to 1.0 front
                         Vector2 scaled_diff = Vector2Scale(diff, scale*scale*scale);
                         preditor_adjustment = Vector2Add(preditor_adjustment, scaled_diff);
+                        // Supposing that PREDATOR_RADIUS < PREDATOR_VISUAL_RADIUS
+                        if (dist < PREDATOR_RADIUS * PREDATOR_RADIUS) {
+                            neighbor->predated = true;
+                            if (dist != 0) neighbor->velocity_update = Vector2Add(neighbor->velocity_update, Vector2Scale(to_neighbor, PREDATOR_AVOID_FACTOR / sqrt(dist)));
+                        }
                     }
                 }
             }

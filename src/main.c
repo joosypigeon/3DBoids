@@ -25,8 +25,8 @@
 
 #include "torus.h"
 
-#define TORUS_MAJOR_SEGMENTS 256
-#define TORUS_MINOR_SEGMENTS 128
+#define TORUS_MAJOR_SEGMENTS 1024
+#define TORUS_MINOR_SEGMENTS 1024
 
 
 int SCREEN_WIDTH;
@@ -35,7 +35,6 @@ float HALF_SCREEN_WIDTH;
 float HALF_SCREEN_HEIGHT;
 bool drawFullGlyph = false;
 bool drawDensity = false;
-bool mousePressed = false;
 bool nearestNeighboursNetwork = false;
 bool pauseSimulation = false;
 bool flat = true;
@@ -144,11 +143,6 @@ int main(void)
 
         if (IsKeyPressed(KEY_SPACE)) pauseSimulation = !pauseSimulation;
         if (!pauseSimulation) UpdateBoids(alignmentWeight, cohesionWeight, separationWeight);
-
-        if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)){
-            if(debugBoid) debugBoid = NULL;
-            else debugBoid = FindNearestBoid(GetMousePosition());
-        }
 
         BeginDrawing();
             ClearBackground(RAYWHITE);

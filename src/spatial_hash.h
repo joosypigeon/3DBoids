@@ -38,6 +38,7 @@ void DrawNearestNeighbor(Boid *boid);
 
 Vector2 Vector2SubtractTorus(Vector2 a, Vector2 b);
 float DistanceOnTorus(Vector2 a, Vector2 b);
+float DistanceOnTorusSquared(Vector2 a, Vector2 b);
 
 Boid *FindNearestBoid(Vector2 position);
 

@@ -12,16 +12,16 @@
 
 
 
-Boid boids[MAX_BOIDS + 2]; // +1 for predator, +1 for mouse
+Boid boids[MAX_BOIDS + 1]; // +1 for predator
 
 Vector2 Vector2SubtractTorus(Vector2 a, Vector2 b) {
     Vector2 diff = { a.x - b.x, a.y - b.y };
 
-    if (diff.x >  SCREEN_WIDTH / 2) diff.x -= SCREEN_WIDTH;
-    if (diff.x < -SCREEN_WIDTH / 2) diff.x += SCREEN_WIDTH;
+    if (diff.x >  HALF_SCREEN_WIDTH) diff.x -= SCREEN_WIDTH;
+    if (diff.x < -HALF_SCREEN_WIDTH) diff.x += SCREEN_WIDTH;
 
-    if (diff.y >  SCREEN_HEIGHT / 2) diff.y -= SCREEN_HEIGHT;
-    if (diff.y < -SCREEN_HEIGHT / 2) diff.y += SCREEN_HEIGHT;
+    if (diff.y >  HALF_SCREEN_HEIGHT) diff.y -= SCREEN_HEIGHT;
+    if (diff.y < -HALF_SCREEN_HEIGHT) diff.y += SCREEN_HEIGHT;
 
     return diff;
 }
@@ -31,10 +31,21 @@ float DistanceOnTorus(Vector2 a, Vector2 b)
     float dx = fabsf(a.x - b.x);
     float dy = fabsf(a.y - b.y);
 
-    if (dx > SCREEN_WIDTH / 2) dx = SCREEN_WIDTH - dx;
-    if (dy > SCREEN_HEIGHT / 2) dy = SCREEN_HEIGHT - dy;
+    if (dx > HALF_SCREEN_WIDTH) dx = SCREEN_WIDTH - dx;
+    if (dy > HALF_SCREEN_HEIGHT) dy = SCREEN_HEIGHT - dy;
 
     return sqrtf(dx * dx + dy * dy);
+}
+
+float DistanceOnTorusSquared(Vector2 a, Vector2 b)
+{
+    float dx = fabsf(a.x - b.x);
+    float dy = fabsf(a.y - b.y);
+
+    if (dx > HALF_SCREEN_WIDTH) dx = SCREEN_WIDTH - dx;
+    if (dy > HALF_SCREEN_HEIGHT) dy = SCREEN_HEIGHT - dy;
+
+    return dx * dx + dy * dy;
 }
 
 void InitBoids() {
@@ -57,13 +68,6 @@ void InitBoids() {
     printf("Predator position: (%.2f, %.2f)\n", boids[PREDATOR_INDEX].position.x, boids[PREDATOR_INDEX].position.y);
     boids[PREDATOR_INDEX].velocity = (Vector2){ PREDATOR_SPEED, PREDATOR_SPEED };
     boids[PREDATOR_INDEX].isPredator = true;
-    //insert_boid(&boids[PREDATOR_INDEX]);
-
-    // Mouse
-    boids[MOUSE_INDEX].position = (Vector2){ -1.0f, -1.0f };
-    boids[MOUSE_INDEX].velocity = (Vector2){ 0.0f, 0.0f };
-    boids[MOUSE_INDEX].isPredator = false;
-
 }
 
 Vector2 Vector2Wrap(Vector2 v, float width, float height)
@@ -81,12 +85,12 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
 {
     // Parallel update stage
     #pragma omp parallel for schedule(static)
-    for (int boid_index = 0; boid_index < MAX_BOIDS; boid_index++) {
+    for (int boid_index = 0; boid_index < MAX_BOIDS; boid_index++) { 
         Boid* self = &boids[boid_index];
 
         // Initialize updates
         self->velocity_update = self->velocity;
-        self->position_update = self->position;
+        self->predated = false;
 
         // Compute flocking forces
         // ComputeFlockForces() is a function that computes the alignment, cohesion, and separation forces
@@ -103,55 +107,29 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
             self->velocity_update = Vector2Add(self->velocity_update, Vector2Scale(cohesion_force, CENTER_FACTOR * cohesionWeight));
         }
         self->velocity_update = Vector2Add(self->velocity_update, Vector2Scale(forces.separation, AVOID_FACTOR * separationWeight));
-
-        // Predator avoidance
-        Vector2 predatorVec = Vector2SubtractTorus(self->position, boids[PREDATOR_INDEX].position);
-        float distToPredator = Vector2Length(predatorVec);
-        if (distToPredator < PREDATOR_RADIUS) {
-            self->predated = true;
-            if (distToPredator != 0)
-                predatorVec = Vector2Scale(predatorVec, PREDATOR_AVOID_FACTOR / distToPredator);
-            self->velocity_update = Vector2Add(self->velocity_update, predatorVec);
-        }
-        else {
-            self->predated = false;
-        }
-
-        // Mouse
-        if (mousePressed) {
-            Vector2 mouseVec = Vector2SubtractTorus(self->position, boids[MOUSE_INDEX].position);
-            float distToMouse = Vector2Length(mouseVec);
-            if (distToMouse < MOUSE_RADIUS) {
-                self->predated = true;
-                if (distToMouse != 0) mouseVec = Vector2Scale(mouseVec, - MOUSE_ATTRACTION_FACTOR / distToMouse);
-                self->velocity_update = Vector2Add(self->velocity_update, mouseVec);
-            }
-        }
-
-        // Speed limiting
-        self->velocity_update = Vector2ClampValue(self->velocity_update, MIN_SPEED, MAX_SPEED);
-
-        // Predict next position
-        self->position_update = Vector2Add(self->position, Vector2Scale(self->velocity_update, GetFrameTime() * 60.0f));
-
-        // Screen wrap
-        self->position_update = Vector2Wrap(self->position_update, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
-    // Commit updates and rebuild spatial hash (serial)
-    clear_spatial_hash();
-    for (int i = 0; i < MAX_BOIDS; i++) {
-        boids[i].velocity = boids[i].velocity_update;
-        boids[i].position = boids[i].position_update;
-        insert_boid(&boids[i]);
-    }
-    insert_boid(&boids[MAX_BOIDS]);
-
-    // Move predator (serial)
+    // Move predator (serial) and avoid predator
     boids[PREDATOR_INDEX].velocity = Vector2Add(boids[PREDATOR_INDEX].velocity, PreditorAjustment());
     boids[PREDATOR_INDEX].velocity = Vector2ClampValue(boids[PREDATOR_INDEX].velocity, MIN_SPEED, PREDATOR_SPEED);
     boids[PREDATOR_INDEX].position = Vector2Add(boids[PREDATOR_INDEX].position, Vector2Scale(boids[PREDATOR_INDEX].velocity, GetFrameTime() * 60.0f));
     boids[PREDATOR_INDEX].position = Vector2Wrap(boids[PREDATOR_INDEX].position, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // Commit updates and rebuild spatial hash (serial)
+    clear_spatial_hash();
+    for (int i = 0; i < MAX_BOIDS; i++) {
+        boids[i].velocity = Vector2ClampValue(boids[i].velocity_update, MIN_SPEED, MAX_SPEED);
+        boids[i].position = Vector2Wrap(
+                                Vector2Add(
+                                    boids[i].position,
+                                    Vector2Scale(
+                                        boids[i].velocity,
+                                        GetFrameTime() * 60.0f)),
+                                SCREEN_WIDTH, SCREEN_HEIGHT);
+        //boids[i].position = boids[i].position_update;
+        insert_boid(&boids[i]);
+    }
+    insert_boid(&boids[MAX_BOIDS]);
 }
 
 int number_drawn = 0;

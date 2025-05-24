@@ -29,7 +29,7 @@
 
 #define BOID_RADIUS 2.0f
 
-#include <stdint.h> 
+#include <stdio.h>
 #define SENTINEL SIZE_MAX
 
 #define WRAP_MOD(a, m) (((a) % (m) + (m)) % (m))

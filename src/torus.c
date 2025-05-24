@@ -157,3 +157,27 @@ Vector3 get_phi_tangent_fast() {
                       torusCoords.cosPhi,
                       -torusCoords.sinPhi * torusCoords.sinTheta };
 }
+
+Matrix get_torus_transform(Boid *boid, float scale) {
+    set_torus_coords(boid->position.x, boid->position.y);
+    Vector3 position = Vector3Add(
+        get_torus_position_fast(),
+        Vector3Scale(get_torus_normal_fast(), BOID_HEIGHT));
+
+    Vector3 velocity = Vector3Add(
+        Vector3Scale(get_theta_tangent_fast(), boid->velocity.x),
+        Vector3Scale(get_phi_tangent_fast(), boid->velocity.y));
+
+    Vector3 forward = Vector3Normalize(velocity);
+    Vector3 up = get_torus_normal_fast();
+    Vector3 right = Vector3CrossProduct(forward, up);
+
+    Matrix transform = {
+        forward.x * scale, up.x * scale, right.x * scale, position.x,
+        forward.y * scale, up.y * scale, right.y * scale, position.y,
+        forward.z * scale, up.z * scale, right.z * scale, position.z,
+        0.0f ,      0.0f,   0.0f,        1.0f
+    };
+
+    return transform;
+}

@@ -174,43 +174,9 @@ void DrawBoid3D(Boid *boid) {
 
 void DrawBoid3DTorus(Boid *boid) {
     number_drawn++;
-
-    set_torus_coords(boid->position.x, boid->position.y);
-    Vector3 position = Vector3Add(
-        get_torus_position_fast(),
-        Vector3Scale(get_torus_normal_fast(), BOID_HEIGHT));
-
-    Vector3 velocity = Vector3Add(
-        Vector3Scale(get_theta_tangent_fast(), boid->velocity.x),
-        Vector3Scale(get_phi_tangent_fast(), boid->velocity.y));
-
-    Vector3 forward = Vector3Normalize(velocity);
-    Vector3 up = get_torus_normal_fast();
-    Vector3 right = Vector3CrossProduct(forward, up);
-
     float scale = 3.0f;
-
-    Matrix transform = {
-        forward.x * scale, up.x * scale, right.x * scale, position.x,
-        forward.y * scale, up.y * scale, right.y * scale, position.y,
-        forward.z * scale, up.z * scale, right.z * scale, position.z,
-        0.0f ,      0.0f,   0.0f,        1.0f
-    };
-
-    dart.transform = transform;
+    dart.transform = get_torus_transform(boid, scale);
     DrawModel(dart, (Vector3){0, 0, 0}, 1.0f, WHITE);
-
-/*
-    Vector3 forward = {1, 0, 0};
-
-    // Cross product gives the rotation axis
-    Vector3 axis = Vector3CrossProduct(forward, dir);
-    float angle = acosf(Vector3DotProduct(forward, dir));
-
-    if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
-
-    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 3.0f, 3.0f, 3.0f }, WHITE);
-    */
 }
 
 void DrawPreditor3D() {
@@ -237,43 +203,9 @@ void DrawPreditor3DTorus() {
     number_drawn++;
 
     Boid *predator = &boids[MAX_BOIDS];
-
-    set_torus_coords(predator->position.x, predator->position.y);
-
-    Vector3 position = Vector3Add(
-        get_torus_position_fast(),
-        Vector3Scale(get_torus_normal_fast(), 10.0f));
-
-    Vector3 velocity = Vector3Add(
-        Vector3Scale(get_theta_tangent_fast(), predator->velocity.x),
-        Vector3Scale(get_phi_tangent_fast(), predator->velocity.y));
-
-    Vector3 forward = Vector3Normalize(velocity);
-    Vector3 up = get_torus_normal_fast();
-    Vector3 right = Vector3CrossProduct(forward, up);
-
     float scale = 10.0f;
-
-    Matrix transform = {
-        forward.x * scale, up.x * scale, right.x * scale, position.x,
-        forward.y * scale, up.y * scale, right.y * scale, position.y,
-        forward.z * scale, up.z * scale, right.z * scale, position.z,
-        0.0f ,      0.0f,   0.0f,        1.0f
-    };
-
-    dart.transform = transform;
+    dart.transform = get_torus_transform(predator, scale);
     DrawModel(dart, (Vector3){0, 0, 0}, 1.0f, RED);
-/*
-    Vector3 forward = {1, 0, 0};
-
-    // Cross product gives the rotation axis
-    Vector3 axis = Vector3CrossProduct(forward, dir);
-    float angle = acosf(Vector3DotProduct(forward, dir));
-
-    if (Vector3Length(axis) < 0.001f) axis = (Vector3){ 0, 1, 0 }; // fallback
-
-    DrawModelEx(dart, position, axis, RAD2DEG * angle, (Vector3){ 10.0f, 10.0f, 10.0f }, RED);
-    */
 }
 
 void DrawMouse(Boid boid) {

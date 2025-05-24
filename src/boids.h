@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define MAX_BOIDS 20000
+#define MAX_BOIDS 30000
 #define PREDATOR_INDEX MAX_BOIDS 
 #define MOUSE_INDEX (MAX_BOIDS + 1)
 
@@ -25,9 +25,13 @@
 
 #define MAX_SPEED 4.5f
 #define MIN_SPEED 1.0f
+#define TINY_SPEED 0.00000001f
 #define PREDATOR_SPEED 7.0f
 
 #define BOID_RADIUS 2.0f
+
+#include <stdint.h> 
+#define SENTINEL SIZE_MAX
 
 #define WRAP_MOD(a, m) (((a) % (m) + (m)) % (m))
 
@@ -45,6 +49,7 @@ extern bool nearestNeighboursNetwork;
 
 // Boid structure
 typedef struct Boid {
+    size_t index; // Unique index for each boid
     Vector2 position;
     Vector2 velocity;
     Vector2 velocity_update;
@@ -72,4 +77,5 @@ Vector3 Shift(Vector3 position);
 
 extern int number_drawn;
 extern bool flat;
+extern size_t frameCounter;
 #endif // BOIDS_H

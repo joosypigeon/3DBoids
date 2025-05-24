@@ -72,7 +72,12 @@ void DrawCells(Vector2 position) {
     }
 }
 
-
+// Returns a random unit vector (uniformly distributed on the circle)
+Vector2 RandomUnitVector2() {
+    //float angle = 2.0f * PI * GetRandomValue(0, 10000) / 10000.0f;
+    float angle = (float)(rand() % 360) * DEG2RAD; // Random angle in radians
+    return (Vector2){ cosf(angle), sinf(angle) };
+}
 
 FlockForces ComputeFlockForces(Boid *boid) {
     FlockForces forces = {0};
@@ -90,6 +95,20 @@ FlockForces ComputeFlockForces(Boid *boid) {
                 Boid* neighbor = cell->boids[j];
                 if (neighbor != boid) {
                     float dist = DistanceOnTorusSquared(boid->position, neighbor->position);
+                    if( dist == 0.0f) {// HACK!!!
+                        printf("HACK!!! Frame %zu: Boid %zu and neighbor %zu are at the same position!\n", frameCounter, boid->index, neighbor->index);
+                        boid->velocity_update = Vector2Add(
+                                                    boid->velocity_update,
+                                                    Vector2Scale(RandomUnitVector2(), TINY_SPEED));
+
+                        // Reset forces
+                        forces.neighborCount = 0;
+                        forces.nearNeighborCount = 0;
+                        forces.alignment = (Vector2){0, 0};
+                        forces.cohesion = (Vector2){0, 0};
+                        forces.separation = (Vector2){0, 0};
+                        break;
+                    }
                     if (dist < PROTECTED_RADIUS * PROTECTED_RADIUS) {
                         Vector2 diff = Vector2SubtractTorus(boid->position, neighbor->position);
                         if (dist != 0) diff = Vector2Scale(diff, 1.0f / dist) ;

@@ -54,6 +54,7 @@ void InitBoids() {
 
     // Initialize boids
     for (int i = 0; i < MAX_BOIDS; i++) {
+        boids[i].index = i;
         boids[i].position = (Vector2){ GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT) };
         float angle = GetRandomValue(0, 360) * DEG2RAD;
         float speed = random_normal(4.0f, 3.0f);
@@ -64,7 +65,7 @@ void InitBoids() {
         insert_boid(&boids[i]);
     }
     // Predator
-    boids[PREDATOR_INDEX].position = (Vector2){ SCREEN_WIDTH/2, SCREEN_HEIGHT/2 };
+    boids[PREDATOR_INDEX].position = (Vector2){ HALF_SCREEN_WIDTH, HALF_SCREEN_HEIGHT };
     printf("Predator position: (%.2f, %.2f)\n", boids[PREDATOR_INDEX].position.x, boids[PREDATOR_INDEX].position.y);
     boids[PREDATOR_INDEX].velocity = (Vector2){ PREDATOR_SPEED, PREDATOR_SPEED };
     boids[PREDATOR_INDEX].isPredator = true;
@@ -85,7 +86,7 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
 {
     // Parallel update stage
     #pragma omp parallel for schedule(static)
-    for (int boid_index = 0; boid_index < MAX_BOIDS; boid_index++) { 
+    for (size_t boid_index = 0; boid_index < MAX_BOIDS; boid_index++) { 
         Boid* self = &boids[boid_index];
 
         // Initialize updates
@@ -109,27 +110,38 @@ void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWe
         self->velocity_update = Vector2Add(self->velocity_update, Vector2Scale(forces.separation, AVOID_FACTOR * separationWeight));
     }
 
-    // Move predator (serial) and avoid predator
-    boids[PREDATOR_INDEX].velocity = Vector2Add(boids[PREDATOR_INDEX].velocity, PreditorAjustment());
-    boids[PREDATOR_INDEX].velocity = Vector2ClampValue(boids[PREDATOR_INDEX].velocity, MIN_SPEED, PREDATOR_SPEED);
-    boids[PREDATOR_INDEX].position = Vector2Add(boids[PREDATOR_INDEX].position, Vector2Scale(boids[PREDATOR_INDEX].velocity, GetFrameTime() * 60.0f));
-    boids[PREDATOR_INDEX].position = Vector2Wrap(boids[PREDATOR_INDEX].position, SCREEN_WIDTH, SCREEN_HEIGHT);
+    // Adjust predator to move towards densest nearby area of boids.
+    // Also adjust boids to avoid predator.
+    boids[PREDATOR_INDEX].velocity = Vector2ClampValue(
+                                        Vector2Add(boids[PREDATOR_INDEX].velocity, PreditorAjustment()),
+                                        MIN_SPEED, PREDATOR_SPEED);
+    boids[PREDATOR_INDEX].position = Vector2Wrap(
+                                        Vector2Add(
+                                            boids[PREDATOR_INDEX].position,
+                                            Vector2Scale(
+                                                boids[PREDATOR_INDEX].velocity,
+                                                GetFrameTime() * 60.0f)),
+                                        SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Commit updates and rebuild spatial hash (serial)
     clear_spatial_hash();
-    for (int i = 0; i < MAX_BOIDS; i++) {
+    for (size_t i = 0; i < MAX_BOIDS; i++) {
         boids[i].velocity = Vector2ClampValue(boids[i].velocity_update, MIN_SPEED, MAX_SPEED);
+        float frameTime = GetFrameTime();
+        if (frameTime == 0.0f) {
+            frameTime = 1.0f / 60.0f; // fix wierd behaviour at startup
+        }
         boids[i].position = Vector2Wrap(
                                 Vector2Add(
                                     boids[i].position,
                                     Vector2Scale(
                                         boids[i].velocity,
-                                        GetFrameTime() * 60.0f)),
+                                        frameTime * 60.0f)),
                                 SCREEN_WIDTH, SCREEN_HEIGHT);
-        //boids[i].position = boids[i].position_update;
         insert_boid(&boids[i]);
     }
     insert_boid(&boids[MAX_BOIDS]);
+
 }
 
 int number_drawn = 0;

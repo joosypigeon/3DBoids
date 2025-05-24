@@ -38,7 +38,7 @@ bool drawDensity = false;
 bool nearestNeighboursNetwork = false;
 bool pauseSimulation = false;
 bool flat = true;
-Boid *debugBoid = NULL;
+size_t frameCounter = 0;
 
 Model dart;
 Model transparentSphere;  // <-- global scope, outside of main()
@@ -122,7 +122,7 @@ int main(void)
     //int number_of_frame = 0;
     while (!WindowShouldClose())
     {
-
+        frameCounter++;
 
         // Update camera
         UpdateCameraManual(&camera);
@@ -148,6 +148,15 @@ int main(void)
             ClearBackground(RAYWHITE);
 
             BeginMode3D(camera);
+
+                rlSetMatrixProjection(MatrixPerspective(45.0f * DEG2RAD, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 10000.0f));
+                rlSetMatrixProjection(MatrixPerspective(
+                    DEG2RAD * camera.fovy,
+                    (float)SCREEN_WIDTH / SCREEN_HEIGHT,
+                    10.0f,     // near clip
+                    10000.0f   // far clip
+                ));
+                
                 BeginShaderMode(shader);
                     if (flat) {
                         DrawPlane(Vector3Zero(), (Vector2) { SCREEN_WIDTH, SCREEN_HEIGHT }, DARKGRAY);

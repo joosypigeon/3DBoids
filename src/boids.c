@@ -178,7 +178,7 @@ void DrawBoid3DTorus(Boid *boid) {
     set_torus_coords(boid->position.x, boid->position.y);
     Vector3 position = Vector3Add(
         get_torus_position_fast(),
-        Vector3Scale(get_torus_normal_fast(), 10.0f));
+        Vector3Scale(get_torus_normal_fast(), BOID_HEIGHT));
 
     Vector3 velocity = Vector3Add(
         Vector3Scale(get_theta_tangent_fast(), boid->velocity.x),

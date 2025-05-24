@@ -6,6 +6,7 @@
 #include "raymath.h"
 
 #define MAX_BOIDS 30000
+#define BOID_HEIGHT 10.0f
 #define PREDATOR_INDEX MAX_BOIDS 
 #define MOUSE_INDEX (MAX_BOIDS + 1)
 
@@ -19,9 +20,7 @@
 #define AVOID_FACTOR 0.15f
 #define MATCH_FACTOR 0.1f
 #define CENTER_FACTOR 0.001f
-#define TURN_FACTOR 0.2f
 #define PREDATOR_AVOID_FACTOR 50.0f
-#define MOUSE_ATTRACTION_FACTOR 0.5f
 
 #define MAX_SPEED 4.5f
 #define MIN_SPEED 1.0f

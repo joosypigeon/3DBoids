@@ -34,7 +34,6 @@ unsigned int hash_cell(int cell_x, int cell_y);
 
 FlockForces ComputeFlockForces(Boid *boid);
 Vector2 PreditorAjustment();
-void DrawNearestNeighbor(Boid *boid);
 
 Vector2 Vector2SubtractTorus(Vector2 a, Vector2 b);
 float DistanceOnTorus(Vector2 a, Vector2 b);

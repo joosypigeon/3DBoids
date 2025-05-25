@@ -213,29 +213,3 @@ Vector2 PreditorAjustment(){
 
     return preditor_adjustment;
 }
-
-
-void DrawNearestNeighbor(Boid *boid){
-    int cell_x = (int)(boid->position.x / CELL_SIZE);
-    int cell_y = (int)(boid->position.y / CELL_SIZE);
-
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dy = -1; dy <= 1; ++dy) {
-            int nx = cell_x + dx;
-            int ny = cell_y + dy;
-            unsigned int index = hash_cell(nx, ny);
-
-            HashCell* cell = &hash_table[index];
-            for (int j = 0; j < cell->length; ++j) {
-                Boid* neighbor = cell->boids[j];
-                if (neighbor != boid) {
-                    float dist = Vector2Distance(boid->position, neighbor->position);
-                    if (dist < NEIGHBOR_RADIUS) {
-                        //printf("boid->position: (%.2f, %.2f), neighbor->position: (%.2f, %.2f)\n",boid->position.x, boid->position.y, neighbor->position.x, neighbor->position.y);
-                        DrawLineV(boid->position, neighbor->position, GREEN);
-                    }
-                }
-            }
-        }
-    }  
-}

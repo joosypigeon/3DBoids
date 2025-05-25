@@ -70,7 +70,6 @@ void InitBoids(void);
 void UpdateBoids(float alignmentWeight, float cohesionWeight, float separationWeight);
 void DrawBoids3D(void);
 void DrawBoids3DTorus(void);
-void DrawNearestNeighborNetwork(void);
 Vector3 Vector2ToVector3(Vector2 v);
 Vector3 Shift(Vector3 position);
 

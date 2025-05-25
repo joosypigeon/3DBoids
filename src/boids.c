@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -208,14 +207,6 @@ void DrawPreditor3DTorus() {
     DrawModel(dart, (Vector3){0, 0, 0}, 1.0f, RED);
 }
 
-void DrawMouse(Boid boid) {
-    // Draw main circle
-    DrawCircleLinesV(boid.position, MOUSE_RADIUS, BLUE);
-
-    // Draw center dot
-    DrawCircleV(boid.position, BOID_RADIUS, RED);
-}
-
 void DrawBoids3D() {
     number_drawn = 0;
     Matrix transform = {
@@ -227,7 +218,6 @@ void DrawBoids3D() {
     dart.transform = transform;
     for (int i = 0; i < MAX_BOIDS; i++) DrawBoid3D(&boids[i]);
     DrawPreditor3D();
-    //if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
 }
 
 void DrawBoids3DTorus() {
@@ -235,9 +225,5 @@ void DrawBoids3DTorus() {
     for (int i = 0; i < MAX_BOIDS; i++) DrawBoid3DTorus(&boids[i]);
     DrawPreditor3DTorus();
     //if (mousePressed) DrawMouse(boids[MOUSE_INDEX]);
-}
-
-void DrawNearestNeighborNetwork(){
-    for (int i = 0; i < MAX_BOIDS; i++) DrawNearestNeighbor(&boids[i]);
 }
 

@@ -79,14 +79,22 @@ Vector2 RandomUnitVector2() {
     return (Vector2){ cosf(angle), sinf(angle) };
 }
 
+// Function to calculate the ceiling of integer division
+int ceil_div(int a, int b) {
+    // Expect both a and b to be positive
+    return (a + b - 1) / b;
+}
+
 FlockForces ComputeFlockForces(Boid *boid) {
     FlockForces forces = {0};
+
+    int width = ceil_div(NEIGHBOR_RADIUS, CELL_SIZE);
 
     int cell_x = (int)(boid->position.x / CELL_SIZE);
     int cell_y = (int)(boid->position.y / CELL_SIZE);
 
-    for (int dx = -1; dx <= 1; ++dx) {  
-        for (int dy = -1; dy <= 1; ++dy) {
+    for (int dx = -width; dx <= width; ++dx) {  
+        for (int dy = -width; dy <= width; ++dy) {
             int nx = cell_x + dx;
             int ny = cell_y + dy;
             unsigned int index = hash_cell(WRAP_MOD(nx, CELL_WIDTH), WRAP_MOD(ny, CELL_HEIGHT));
@@ -159,19 +167,12 @@ Boid *FindNearestBoid(Vector2 position) {
     return nearest_boid;
 }
 
-// Function to calculate the ceiling of integer division
-int ceil_div(int a, int b) {
-    // Expect both a and b to be positive
-    return (a + b - 1) / b;
-}
-
 Vector2 PreditorAjustment(){
     Vector2 preditor_adjustment = {0.0f, 0.0f};
 
     Vector2 predator_dir = Vector2Normalize(boids[PREDATOR_INDEX].velocity);
 
     int width = ceil_div(PREDATOR_VISUAL_RADIUS, CELL_SIZE);
-    if (width < 1) width = 1;
 
     Boid* predator = &boids[PREDATOR_INDEX];
     int cell_x = (int)(predator->position.x / CELL_SIZE);
